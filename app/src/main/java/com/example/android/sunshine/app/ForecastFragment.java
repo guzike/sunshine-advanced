@@ -32,9 +32,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.android.sunshine.app.data.WeatherContract;
-import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
 
 /**
  * Encapsulates fetching the forecast and displaying it as a {@link ListView} layout.
@@ -44,6 +44,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private ForecastAdapter mForecastAdapter;
 
     private ListView mListView;
+    private View mEmptyView;
     private int mPosition = ListView.INVALID_POSITION;
     private boolean mUseTodayLayout;
 
@@ -139,6 +140,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         // Get a reference to the ListView, and attach this adapter to it.
         mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        mEmptyView = rootView.findViewById(R.id.listview_forecast_empty);
+        mListView.setEmptyView(mEmptyView);
         mListView.setAdapter(mForecastAdapter);
         // We'll call our MainActivity
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -248,11 +251,13 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mForecastAdapter.swapCursor(data);
+
         if (mPosition != ListView.INVALID_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
             // to, do so now.
             mListView.smoothScrollToPosition(mPosition);
         }
+        updateEmptyView();
     }
 
     @Override
@@ -264,6 +269,20 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         mUseTodayLayout = useTodayLayout;
         if (mForecastAdapter != null) {
             mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
+        }
+    }
+
+    private void updateEmptyView() {
+        if ( mForecastAdapter.getCount() == 0 ) {
+            TextView tv = (TextView) getView().findViewById(R.id.listview_forecast_empty);
+            if ( null != tv ) {
+                // if cursor is empty, why? do we have an invalid location
+                int message = R.string.empty_forecast_list;
+                if (!Utility.isNetworkAvailable(getActivity()) ) {
+                    message = R.string.empty_forecast_list_no_network;
+                }
+                tv.setText(message);
+            }
         }
     }
 }
