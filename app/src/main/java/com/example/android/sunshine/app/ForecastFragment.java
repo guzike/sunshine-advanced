@@ -42,13 +42,11 @@ import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
 /**
  * Encapsulates fetching the forecast and displaying it as a {@link ListView} layout.
  */
-public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     private ForecastAdapter mForecastAdapter;
 
     private ListView mListView;
-    private View mEmptyView;
     private int mPosition = ListView.INVALID_POSITION;
     private boolean mUseTodayLayout;
 
@@ -158,8 +156,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         // Get a reference to the ListView, and attach this adapter to it.
         mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
-        mEmptyView = rootView.findViewById(R.id.listview_forecast_empty);
-        mListView.setEmptyView(mEmptyView);
+        View emptyView = rootView.findViewById(R.id.listview_forecast_empty);
+        mListView.setEmptyView(emptyView);
         mListView.setAdapter(mForecastAdapter);
         // We'll call our MainActivity
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -269,7 +267,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mForecastAdapter.swapCursor(data);
-
         if (mPosition != ListView.INVALID_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
             // to, do so now.
@@ -291,9 +288,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     /*
-       Updates the empty list view with contextually relevant information that the user can
-       use to determine why they aren't seeing weather.
-    */
+        Updates the empty list view with contextually relevant information that the user can
+        use to determine why they aren't seeing weather.
+     */
     private void updateEmptyView() {
         if ( mForecastAdapter.getCount() == 0 ) {
             TextView tv = (TextView) getView().findViewById(R.id.listview_forecast_empty);
@@ -327,4 +324,5 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             updateEmptyView();
         }
     }
+
 }
